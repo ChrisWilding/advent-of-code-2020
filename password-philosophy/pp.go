@@ -13,7 +13,7 @@ import (
 
 var re = regexp.MustCompile(`(\d+)-(\d+) (\w): (\w+)`)
 
-func IsValidPassword(input string) bool {
+func IsValidPasswordOne(input string) bool {
 	matches := re.FindAllStringSubmatch(input, -1)
 	lower, _ := strconv.Atoi(matches[0][1])
 	upper, _ := strconv.Atoi(matches[0][2])
@@ -30,10 +30,22 @@ func IsValidPassword(input string) bool {
 	return count >= lower && count <= upper
 }
 
-func CountValidPasswords(inputs []string) int {
+func IsValidPasswordTwo(input string) bool {
+	matches := re.FindAllStringSubmatch(input, -1)
+	first, _ := strconv.Atoi(matches[0][1])
+	first--
+	second, _ := strconv.Atoi(matches[0][2])
+	second--
+	letter, _ := utf8.DecodeRuneInString(matches[0][3])
+	password := []rune(matches[0][4])
+
+	return password[first] != password[second] && (password[first] == letter || password[second] == letter)
+}
+
+func CountValidPasswords(inputs []string, f func(string) bool) int {
 	var valid int
 	for _, input := range inputs {
-		if IsValidPassword(input) {
+		if f(input) {
 			valid++
 		}
 	}
@@ -51,5 +63,6 @@ func read(path string) []string {
 func main() {
 	path := os.Args[1]
 	lines := read(path)
-	fmt.Println(CountValidPasswords(lines))
+	fmt.Println(CountValidPasswords(lines, IsValidPasswordOne))
+	fmt.Println(CountValidPasswords(lines, IsValidPasswordTwo))
 }
